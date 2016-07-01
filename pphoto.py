@@ -14,8 +14,9 @@ def parseFile(folderPath, fileName):
 
     sourceFilePath = folderPath + "/" + fileName
     try:
-        fileDate = datetime.datetime.fromtimestamp(os.path.getctime(sourceFilePath))
+        fileDate = datetime.datetime.fromtimestamp(os.path.getmtime(sourceFilePath))
     except:
+        pass
         print "Fail GetDate" + sourceFilePath
         return
 
