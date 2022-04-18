@@ -1,46 +1,108 @@
 #!/usr/bin/python3
+from fileinput import filename
 import os
 import sys
 import argparse
 import os
 import time
 import datetime
+import hashlib
+
 
 globTargetFolder=""
-globDryRun=False
+globDryRun=True
 def parseFile(folderPath, fileName):
     if fileName == ".DS_Store":
         return
 
     sourceFilePath = folderPath + "/" + fileName
-    try:
-        fileDate = datetime.datetime.fromtimestamp(os.path.getmtime(sourceFilePath))
-    except:
-        pass
-        print ("Fail GetDate" + sourceFilePath)
+
+    # check source file exist
+    if os.path.isfile(sourceFilePath) == False:
+        print ("SourceFile is not exist:" + sourceFilePath)
         return
+
+    # only parse image file and movie file
+    if isImageFile(sourceFilePath) == False and isMovieFile(sourceFilePath) == False:
+        print ("File is not image and movie file, skip " + sourceFilePath);
+        return
+
+    fileDate = getFileDate(sourceFilePath)
 
     fileMonth = fileDate.month;
     fileMonthStr = "%02d" % fileMonth
     targetFolder = globTargetFolder + "/" + repr(fileDate.year) + "/" + fileMonthStr + "/"
     targetFilePath =  targetFolder + fileName
 
+    dupTargetFolder = targetFolder + "dup/"
+    dupSourceFolder = folderPath   + "/dup/"
+
     print (sourceFilePath + "-->" + targetFilePath)
     if globDryRun:
         return
-
-    if os.path.exists(targetFolder) != True:
-        os.makedirs (targetFolder)
-
-    if os.path.isfile(sourceFilePath) == False:
-        print ("SourceFile Not Exist" + sourceFilePath)
-        return
+    
+    ensureFolder(targetFolder)
 
     if os.path.isfile(targetFilePath) == False: #Target File not exist
         os.rename(sourceFilePath, targetFilePath)
     else:
-        print ("TargetFile Exist" + targetFilePath)
+        if (isFileMD5Same(sourceFilePath, targetFilePath) == False):
+            print ("Same Name exist, but different file, prefix with dup")
+            ensureFolder(dupTargetFolder)
+            os.rename(sourceFilePath,  + dupTargetFolder + fileName)
+        else:
+            print ("Same file exist, move to duplicate folder:" + dupSourceFolder + fileName)
+            ensureFolder(dupSourceFolder)
+            os.rename(sourceFilePath, dupSourceFolder + fileName)
     return
+
+def ensureFolder(folder):
+    if os.path.exists(folder) != True:
+        os.makedirs (folder)
+
+
+def getFileDate(filePath):
+    fileDate = datetime.date(1990,1,1) # default value 1990-01-01
+    try:
+        fileDate = datetime.datetime.fromtimestamp(os.path.getmtime(filePath))
+    except:
+        print ("Fail GetDate" + filePath)   
+        pass
+    
+    # if (isImageFile(filePath)):
+    #     fileDate = getImageExifCreationDate(filePath)
+
+    return fileDate
+
+
+def isImageFile(filePath):
+    fileName = os.path.basename(filePath)
+    fileExt = os.path.splitext(fileName)[1]
+    if fileExt == ".jpg" or fileExt == ".JPG" or fileExt == ".jpeg" or fileExt == ".JPEG":
+        return True
+    return False
+
+# def getImageExifCreationDate(filePath):
+#     pass
+
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+def isFileMD5Same(filePath1, filePath2):
+    file1Hash = md5(filePath1)
+    file2Hash = md5(filePath2)
+    return file1Hash == file2Hash
+
+def isMovieFile(filePath):
+    fileName = os.path.basename(filePath)
+    fileExt = os.path.splitext(fileName)[1]
+    if fileExt == ".mov" or fileExt == ".MOV":
+        return True
+    return False
 
 def parseFolder(folder):
     for root, dirs, files in os.walk(folder):
