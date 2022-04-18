@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from fileinput import filename
+from operator import contains
 import os
 import sys
 import argparse
@@ -47,13 +48,15 @@ def parseFile(folderPath, fileName):
         os.rename(sourceFilePath, targetFilePath)
     else:
         if (isFileMD5Same(sourceFilePath, targetFilePath) == False):
-            print ("Same Name exist, but different file, prefix with dup")
-            ensureFolder(dupTargetFolder)
-            os.rename(sourceFilePath,  + dupTargetFolder + fileName)
+            if os.path.isfile(dupTargetFolder + fileName) == False:
+                ensureFolder(dupTargetFolder)
+                os.rename(sourceFilePath,  + dupTargetFolder + fileName)
+                print ("Same Name exist, but different file, prefix with dup")
         else:
-            print ("Same file exist, move to duplicate folder:" + dupSourceFolder + fileName)
-            ensureFolder(dupSourceFolder)
-            os.rename(sourceFilePath, dupSourceFolder + fileName)
+            if os.path.isfile(dupSourceFolder + fileName) == False:
+                ensureFolder(dupSourceFolder)
+                os.rename(sourceFilePath, dupSourceFolder + fileName)
+                print ("Same file exist, move to duplicate folder:" + dupSourceFolder + fileName)
     return
 
 def ensureFolder(folder):
@@ -107,6 +110,10 @@ def isMovieFile(filePath):
 def parseFolder(folder):
     for root, dirs, files in os.walk(folder):
         print (root)
+        if "dup" in root:
+            print ("Skip Duplicate Folder:" + root)
+            continue
+
         for file in files:
             parseFile(root, file)
     return
