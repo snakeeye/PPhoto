@@ -49,14 +49,16 @@ def parseFile(folderPath, fileName):
     else:
         if (isFileMD5Same(sourceFilePath, targetFilePath) == False):
             if os.path.isfile(dupTargetFolder + fileName) == False:
+                print ("Same Name exist, but different file, prefix with dup：" + dupTargetFolder + fileName)
                 ensureFolder(dupTargetFolder)
-                os.rename(sourceFilePath,  + dupTargetFolder + fileName)
-                print ("Same Name exist, but different file, prefix with dup")
+                os.rename(sourceFilePath,  dupTargetFolder + fileName)
+                
         else:
             if os.path.isfile(dupSourceFolder + fileName) == False:
+                print ("Same file exist, move to duplicate folder:" + dupSourceFolder + fileName)
                 ensureFolder(dupSourceFolder)
                 os.rename(sourceFilePath, dupSourceFolder + fileName)
-                print ("Same file exist, move to duplicate folder:" + dupSourceFolder + fileName)
+                
     return
 
 def ensureFolder(folder):
@@ -81,7 +83,7 @@ def getFileDate(filePath):
 def isImageFile(filePath):
     fileName = os.path.basename(filePath)
     fileExt = os.path.splitext(fileName)[1]
-    if fileExt == ".jpg" or fileExt == ".JPG" or fileExt == ".jpeg" or fileExt == ".JPEG":
+    if fileExt == ".jpg" or fileExt == ".JPG" or fileExt == ".jpeg" or fileExt == ".JPEG" or fileExt == ".HEIC" or fileExt == ".heic" or fileExt == ".png" or fileExt == ".PNG" or fileExt == ".gif" or fileExt == ".GIF" or fileExt == ".CR2" or fileExt == ".cr2" or fileExt == ".TIF" or fileExt == ".tif":
         return True
     return False
 
@@ -103,7 +105,7 @@ def isFileMD5Same(filePath1, filePath2):
 def isMovieFile(filePath):
     fileName = os.path.basename(filePath)
     fileExt = os.path.splitext(fileName)[1]
-    if fileExt == ".mov" or fileExt == ".MOV":
+    if fileExt == ".mov" or fileExt == ".MOV" or fileExt == ".MP4" or fileExt == ".mp4" or fileExt == ".MPG" or fileExt == ".mpg":
         return True
     return False
 
