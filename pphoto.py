@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import os
 import sys
 import argparse
@@ -17,7 +17,7 @@ def parseFile(folderPath, fileName):
         fileDate = datetime.datetime.fromtimestamp(os.path.getmtime(sourceFilePath))
     except:
         pass
-        print "Fail GetDate" + sourceFilePath
+        print ("Fail GetDate" + sourceFilePath)
         return
 
     fileMonth = fileDate.month;
@@ -25,7 +25,7 @@ def parseFile(folderPath, fileName):
     targetFolder = globTargetFolder + "/" + repr(fileDate.year) + "/" + fileMonthStr + "/"
     targetFilePath =  targetFolder + fileName
 
-    print sourceFilePath + "-->" + targetFilePath
+    print (sourceFilePath + "-->" + targetFilePath)
     if globDryRun:
         return
 
@@ -33,18 +33,18 @@ def parseFile(folderPath, fileName):
         os.makedirs (targetFolder)
 
     if os.path.isfile(sourceFilePath) == False:
-        print "SourceFile Not Exist" + sourceFilePath
+        print ("SourceFile Not Exist" + sourceFilePath)
         return
 
     if os.path.isfile(targetFilePath) == False: #Target File not exist
         os.rename(sourceFilePath, targetFilePath)
     else:
-        print "TargetFile Exist" + targetFilePath
+        print ("TargetFile Exist" + targetFilePath)
     return
 
 def parseFolder(folder):
     for root, dirs, files in os.walk(folder):
-        print root
+        print (root)
         for file in files:
             parseFile(root, file)
     return
@@ -56,8 +56,8 @@ def main():
     globTargetFolder = args["target"]
     global globDryRun
     globDryRun = args["dryrun"]
-    print "SourceFolder="+sourceFolder
-    print "TargetFolder="+globTargetFolder
+    print ("SourceFolder="+sourceFolder)
+    print ("TargetFolder="+globTargetFolder)
     parseFolder(sourceFolder)
 
 def parseArgs():
